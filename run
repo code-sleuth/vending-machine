@@ -43,7 +43,7 @@ case $env in
         export DB_HOST=localhost
         export DB_PORT=5432
         export DB_USERNAME=code
-        export DB_PASSWORD=<password>
+        export DB_PASSWORD='<password>'
         export DB_NAME=vending_machine_test
         export TEST_DB_NAME=vending_machine_test
         export DB_SSL_MODE=disable
@@ -68,7 +68,7 @@ case $env in
         export DB_HOST=localhost
         export DB_PORT=5432
         export DB_USERNAME=code
-        export DB_PASSWORD=<password>
+        export DB_PASSWORD='<password>'
         export DB_NAME=vending_machine_prod
         export TEST_DB_NAME=vending_machine_test
         export DB_SSL_MODE=disable
