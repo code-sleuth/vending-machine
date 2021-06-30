@@ -1,0 +1,97 @@
+#!/bin/bash
+# use this script to run backend on local machine
+# options
+# -d = DEV
+# -p = PROD
+# ./run -d
+#set -e
+
+options_found=0
+env=0
+while getopts ":dp" opt; do
+  case $opt in
+    d)
+        ((options_found++))
+        ((env=1))
+        ;;
+    p)
+        ((options_found++))
+        ((env=2))
+        ;;
+    \?)
+        echo "Invalid option: -$OPTARG.  Valid option is either -d or -p" >&2
+        exit 1
+        ;;
+  esac
+done
+
+# check if someone passed -d AND -p
+if (($options_found != 1)); then
+    echo "Invalid options passed.  Did you pass an environment option -d OR -p" >&2
+    exit 1
+fi
+
+RED='\033[0;31m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+case $env in
+    1)
+        echo -e "${BLUE}Starting in DEVELOPMENT" >&2
+        echo "===============Vending Machine DEVELOPMENT BACKEND SERVER=================="
+        export DB_DIALECT=postgres
+        export DB_HOST=localhost
+        export DB_PORT=5432
+        export DB_USERNAME=code
+        export DB_PASSWORD=<password>
+        export DB_NAME=vending_machine_test
+        export TEST_DB_NAME=vending_machine_test
+        export DB_SSL_MODE=disable
+        export ENVIRONMENT=development
+        export JWT_SECRET=topsecret
+        echo "================ ENVIRONMENT VARIABLES FOR DEV ======================="
+        echo -e "${RED}export DB_DIALECT=${DB_DIALECT}"
+        echo -e "${RED}export DB_HOST=${DB_HOST}"
+        echo -e "${RED}export DB_PORT=${DB_PORT}"
+        echo -e "${RED}export DB_USERNAME=${DB_USERNAME}"
+        echo -e "${RED}export DB_PASSWORD=${DB_PASSWORD}"
+        echo -e "${RED}export DB_NAME=${DB_NAME}"
+        echo -e "${RED}export TEST_DB_NAME=${TEST_DB_NAME}"
+        echo -e "${RED}export DB_SSL_MODE=${DB_SSL_MODE}"
+        echo -e "${RED}export ENVIRONMENT=${ENVIRONMENT}"
+        echo -e "${RED}export JWT_SECRET=${JWT_SECRET}${NC}"
+        ;;
+    2)
+        echo "Starting in PRODUCTION" >&2
+        #======================= PRODUCTION ==============================
+        export DB_DIALECT=postgres
+        export DB_HOST=localhost
+        export DB_PORT=5432
+        export DB_USERNAME=code
+        export DB_PASSWORD=<password>
+        export DB_NAME=vending_machine_prod
+        export TEST_DB_NAME=vending_machine_test
+        export DB_SSL_MODE=disable
+        export ENVIRONMENT=production
+        export JWT_SECRET=topsecret
+        echo "================ EVIRONMENT VARIABLES FOR PRODUCTION ======================="
+        echo -e "${RED}export DB_DIALECT=${DB_DIALECT}"
+        echo -e "${RED}export DB_HOST=${DB_HOST}"
+        echo -e "${RED}export DB_PORT=${DB_PORT}"
+        echo -e "${RED}export DB_USERNAME=${DB_USERNAME}"
+        echo -e "${RED}export DB_PASSWORD=${DB_PASSWORD}"
+        echo -e "${RED}export DB_NAME=${DB_NAME}"
+        echo -e "${RED}export TEST_DB_NAME=${TEST_DB_NAME}"
+        echo -e "${RED}export DB_SSL_MODE=${DB_SSL_MODE}"
+        echo -e "${RED}export ENVIRONMENT=${ENVIRONMENT}"
+        echo -e "${RED}export JWT_SECRET=${JWT_SECRET}${NC}"
+        ;;
+    *)
+        echo "Unable to set runtime environment. Did you pass an environment option -d OR -p" >&2
+        exit 1
+        ;;
+esac
+
+GO=/usr/local/go/bin/go
+CGO_ENABLED=0 $GO build -ldflags '-s -w' -o ./ .
+./vending-machine
