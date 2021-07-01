@@ -262,7 +262,59 @@ func DepositAmount(w http.ResponseWriter, r *http.Request) {
 		helpers.ErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	u.Password = ""
+	helpers.JSONResponse(w, http.StatusAccepted, u)
+}
 
+// Buy function
+func Buy (w http.ResponseWriter, r *http.Request) {
+	var user models.User
+	params := mux.Vars(r)
+
+	username, ok := CheckIfUserSessionIsActive(w, r)
+	if !ok {
+		return
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+		helpers.ErrorResponse(w, http.StatusBadRequest, "bad request: "+err.Error())
+		return
+	}
+	defer func() {
+		if err := r.Body.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
+
+	uid, err := helpers.ConvertStringToUint(params["id"])
+	if err != nil {
+		helpers.ErrorResponse(w, http.StatusNotFound, "invalid character in route:"+err.Error())
+		return
+	}
+
+	id, ok := models.UserCanCRUDBuyer(username)
+	if !ok && uid != id {
+		helpers.ErrorResponse(w, http.StatusForbidden, "insufficient rights to make purchase, make sure user is a buyer")
+		return
+	}
+
+	productID, err := helpers.ConvertStringToUint(params["productId"])
+	if err != nil {
+		helpers.ErrorResponse(w, http.StatusNotFound, "invalid character in route for amount:"+err.Error())
+		return
+	}
+
+	amount, err := helpers.ConvertStringToInt(params["amountOfProducts"])
+	if err != nil {
+		helpers.ErrorResponse(w, http.StatusNotFound, "invalid character in route for amount:"+err.Error())
+		return
+	}
+
+	u, err := user.Buy(uid, productID, amount)
+	if err != nil {
+		helpers.ErrorResponse(w, http.StatusBadRequest, err.Error())
+		return
+	}
 	helpers.JSONResponse(w, http.StatusAccepted, u)
 }
 
