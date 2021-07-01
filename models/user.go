@@ -258,7 +258,7 @@ func (u *User) DepositAmount(userID uint, amount int) (*User, error)  {
 		return nil, err
 	}
 
-	user.Deposit = u.Deposit + amount
+	user.Deposit = user.Deposit + amount
 
 	tx := db.Begin()
 	if err := db.Save(user).Error; err != nil {
