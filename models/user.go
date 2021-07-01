@@ -214,8 +214,8 @@ func comparePasswords(hashedPwd string, plainPwd []byte) bool {
 	return true
 }
 
-// UserCanCRUD function
-func UserCanCRUD(username string) (uint, bool) {
+// UserCanCRUDBuyer function
+func UserCanCRUDBuyer(username string) (uint, bool) {
 	var u User
 
 	user, err := u.GetUserByUsername(username)
@@ -244,6 +244,92 @@ func UserCanCRUDSeller(username string) (uint, bool) {
 	}
 
 	return 0, false
+}
+
+// DepositAmount ...
+func (u *User) DepositAmount(userID uint, amount int) (*User, error)  {
+	acceptedDenominations := []int{5, 10, 20, 50, 100}
+	if ok := Find(acceptedDenominations, amount); !ok {
+		errString := fmt.Sprintf("[%+v] is not in the acceptable denominations: use one of the following %+v", amount, acceptedDenominations)
+		return nil, errors.New(errString)
+	}
+	user, err := u.GetUser(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	user.Deposit = u.Deposit + amount
+
+	tx := db.Begin()
+	if err := db.Save(user).Error; err != nil {
+		tx.Rollback()
+		return nil, errors.New("failed to update user deposit: " + err.Error())
+	}
+	tx.Commit()
+	return user, nil
+
+}
+
+func (u *User) Buy(productID, userID uint, numberOfProducts int)  (string, error) {
+	var p Product
+	product, err := p.GetProduct(productID)
+	if err != nil {
+		return "", err
+	}
+
+	if numberOfProducts > product.AmountAvailable {
+		errString := fmt.Sprintf("requested amount %+v is greater than available amout %+v", numberOfProducts, product.AmountAvailable)
+		return "", errors.New(errString)
+	}
+
+	user, err := u.GetUser(userID)
+	if err != nil {
+		return "", err
+	}
+
+	amountToSpend := numberOfProducts * product.Cost
+	transaction  := user.Deposit - amountToSpend
+	if transaction < 0 {
+		errString := fmt.Sprintf("insufficient funds to spend [%+v], available balance is [%+v]", amountToSpend, user.Deposit)
+		return "", errors.New(errString)
+	}
+
+	user.Deposit = user.Deposit - amountToSpend
+	tx := db.Begin()
+	if err := db.Save(user).Error; err != nil {
+		tx.Rollback()
+		return "", errors.New("failed to buy item: " + err.Error())
+	}
+	tx.Commit()
+
+	s := fmt.Sprintf("successfully made purchase of [%+v], available balance is [%+v]", transaction, user.Deposit)
+	return s, nil
+}
+
+// Reset ...
+func (u *User) Reset (userID uint,) (*User,error){
+	user, err := u.GetUser(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	user.Deposit = 0
+	tx := db.Begin()
+	if err := db.Save(user).Error; err != nil {
+		tx.Rollback()
+		return nil, errors.New("failed to reset user deposit: " + err.Error())
+	}
+	tx.Commit()
+	return user, nil
+}
+
+func Find(slice []int, val int) bool {
+	for _, item := range slice {
+		if item == val {
+			return true
+		}
+	}
+	return false
 }
 
 // ChangePassword struct

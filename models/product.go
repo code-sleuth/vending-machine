@@ -16,9 +16,9 @@ type Product struct {
 }
 
 // CreateProduct function
-func (p *Product) CreateProduct(cost int, productName string, sellerId uint) (*Product, error) {
+func (p *Product) CreateProduct(cost, amountAvailable int, productName string, sellerId uint) (*Product, error) {
 	product := Product{
-		AmountAvailable: 0,
+		AmountAvailable: amountAvailable,
 		Cost:            cost,
 		ProductName:     productName,
 		SellerID:        sellerId,
@@ -60,13 +60,14 @@ func (p *Product) GetProduct(id uint) (*Product, error) {
 }
 
 // UpdateProduct function
-func (p *Product) UpdateProduct(id, sellerID uint, cost int, productName string) (*Product, error) {
+func (p *Product) UpdateProduct(id, sellerID uint, cost, amountAvailable int, productName string) (*Product, error) {
 	product, err := p.GetProduct(id)
 	if err != nil {
 		return nil, errors.New(err.Error())
 	}
 
 	product.Cost = cost
+	product.AmountAvailable = amountAvailable
 	product.ProductName = productName
 	product.SellerID = sellerID
 

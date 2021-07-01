@@ -57,7 +57,7 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, ok = models.UserCanCRUD(username)
+	_, ok = models.UserCanCRUDBuyer(username)
 	if !ok {
 		helpers.ErrorResponse(w, http.StatusForbidden, "insufficient rights to list users")
 		return
@@ -89,7 +89,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, ok := models.UserCanCRUD(username)
+	id, ok := models.UserCanCRUDBuyer(username)
 	if !ok && uid != id {
 		helpers.ErrorResponse(w, http.StatusForbidden, "insufficient rights to get user")
 		return
@@ -130,7 +130,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, ok := models.UserCanCRUD(username)
+	id, ok := models.UserCanCRUDBuyer(username)
 	if !ok && uid != id {
 		helpers.ErrorResponse(w, http.StatusForbidden, "insufficient rights to update user")
 		return
@@ -173,7 +173,7 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, ok := models.UserCanCRUD(username)
+	id, ok := models.UserCanCRUDBuyer(username)
 	if !ok && uid != id {
 		helpers.ErrorResponse(w, http.StatusForbidden, "insufficient rights to update user")
 		return
@@ -196,7 +196,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, ok := models.UserCanCRUD(username); !ok {
+	if _, ok := models.UserCanCRUDBuyer(username); !ok {
 		helpers.ErrorResponse(w, http.StatusForbidden, "insufficient rights to delete user")
 		return
 	}
