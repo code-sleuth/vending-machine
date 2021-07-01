@@ -37,6 +37,16 @@ func ConvertStringToUint(param string) (uint, error) {
 	return uid, nil
 }
 
+// ConvertStringToInt function
+func ConvertStringToInt(param string) (int, error) {
+	u64, err := strconv.ParseInt(param, 10, 32)
+	if err != nil {
+		return 0, err
+	}
+	uid := int(u64)
+	return uid, nil
+}
+
 // GetEnv function
 func GetEnv(key string, defaultVal string) string {
 	if value, exists := os.LookupEnv(key); exists {

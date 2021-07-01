@@ -20,4 +20,5 @@ func (controller UserController) registerRoutes() {
 	controller.Router.HandleFunc("/api/users/{id}", helpers.IsAuthorized(handlers.UpdateUser)).Methods("PUT")
 	controller.Router.HandleFunc("/api/users/{id}/change_password", helpers.IsAuthorized(handlers.ChangePassword)).Methods("PUT")
 	controller.Router.HandleFunc("/api/users/{id}", helpers.IsAuthorized(handlers.DeleteUser)).Methods("DELETE")
+	controller.Router.HandleFunc("/api/users/deposit/{id}/{amount}", helpers.IsAuthorized(handlers.DepositAmount)).Methods("POST")
 }

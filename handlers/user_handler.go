@@ -219,6 +219,53 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	helpers.JSONResponse(w, http.StatusAccepted, map[string]string{"success": d})
 }
 
+// DepositAmount function
+func DepositAmount(w http.ResponseWriter, r *http.Request) {
+	var user models.User
+	params := mux.Vars(r)
+
+	username, ok := CheckIfUserSessionIsActive(w, r)
+	if !ok {
+		return
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+		helpers.ErrorResponse(w, http.StatusBadRequest, "bad request: "+err.Error())
+		return
+	}
+	defer func() {
+		if err := r.Body.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
+
+	uid, err := helpers.ConvertStringToUint(params["id"])
+	if err != nil {
+		helpers.ErrorResponse(w, http.StatusNotFound, "invalid character in route:"+err.Error())
+		return
+	}
+
+	id, ok := models.UserCanCRUDBuyer(username)
+	if !ok && uid != id {
+		helpers.ErrorResponse(w, http.StatusForbidden, "insufficient rights to deposit, make sure user is a buyer")
+		return
+	}
+
+	amount, err := helpers.ConvertStringToInt(params["amount"])
+	if err != nil {
+		helpers.ErrorResponse(w, http.StatusNotFound, "invalid character in route for amount:"+err.Error())
+		return
+	}
+
+	u, err := user.DepositAmount(uid, amount)
+	if err != nil {
+		helpers.ErrorResponse(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	helpers.JSONResponse(w, http.StatusAccepted, u)
+}
+
 // Login function
 func Login(w http.ResponseWriter, r *http.Request) {
 	var user models.User
