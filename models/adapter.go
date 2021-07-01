@@ -47,8 +47,10 @@ func Adapter() {
 	db := dbConnect(os.Getenv("ENVIRONMENT"))
 	db.AutoMigrate(
 		User{},
+		Product{},
 	)
 	db.Model(&User{}).AddUniqueIndex("idx_username", "username")
+	db.Model(&Product{}).AddForeignKey("seller_id", "users(id)", "CASCADE", "CASCADE")
 	defer func() {
 		if err := db.Close(); err != nil {
 			log.Println(err)

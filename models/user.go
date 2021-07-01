@@ -26,18 +26,6 @@ func (r *userRole) Value() (driver.Value, error) {
 	return string(*r), nil
 }
 
-// implement enum for access
-type userAccess string
-
-func (a *userAccess) Scan(value interface{}) error {
-	*a = userAccess(value.([]byte))
-	return nil
-}
-
-func (a userAccess) Value() (driver.Value, error) {
-	return string(a), nil
-}
-
 // User defines the structure of the users of the system.
 type User struct {
 	gorm.Model
@@ -127,7 +115,7 @@ func (u *User) ChangePassword(id uint, oldPassword, newPassword, confirmNewPassw
 	}
 
 	if !(newPassword == confirmNewPassword) {
-		return nil, errors.New("new passwords and confirm password do not match")
+		return nil, errors.New("new password and confirm password do not match")
 	}
 
 	user.Password = hashAndSalt(getPwdBytes(newPassword))
@@ -236,6 +224,22 @@ func UserCanCRUD(username string) (uint, bool) {
 	}
 
 	if user.Role == "buyer" {
+		return user.ID, true
+	}
+
+	return 0, false
+}
+
+// UserCanCRUDSeller function
+func UserCanCRUDSeller(username string) (uint, bool) {
+	var u User
+
+	user, err := u.GetUserByUsername(username)
+	if err != nil {
+		return 0, false
+	}
+
+	if user.Role == "seller" {
 		return user.ID, true
 	}
 
