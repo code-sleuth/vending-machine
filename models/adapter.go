@@ -48,7 +48,7 @@ func Adapter() {
 	db.AutoMigrate(
 		User{},
 	)
-	db.Model(&User{}).AddUniqueIndex("idx_email", "email")
+	db.Model(&User{}).AddUniqueIndex("idx_username", "username")
 	defer func() {
 		if err := db.Close(); err != nil {
 			log.Println(err)

@@ -18,11 +18,6 @@ import (
 func CreateUser(w http.ResponseWriter, r *http.Request) {
 	var user models.User
 
-	email, ok := CheckIfUserSessionIsActive(w, r)
-	if !ok {
-		return
-	}
-
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		helpers.ErrorResponse(w, http.StatusBadRequest, "bad request: "+err.Error())
 		return
@@ -44,18 +39,12 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, ok = models.UserCanCRUD(email)
-	if !ok {
-		helpers.ErrorResponse(w, http.StatusForbidden, "insufficient rights to create user or you're logged out")
-		return
-	}
-
 	u, err := user.CreateUser(user.Username, user.Password, string(user.Role), user.Deposit)
 	if err != nil {
 		helpers.ErrorResponse(w, http.StatusBadRequest, "unable to create user "+err.Error())
 		return
 	}
-
+	u.Password = ""
 	helpers.JSONResponse(w, http.StatusCreated, u)
 }
 
@@ -63,12 +52,12 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 func GetUsers(w http.ResponseWriter, r *http.Request) {
 	var u models.User
 
-	email, ok := CheckIfUserSessionIsActive(w, r)
+	username, ok := CheckIfUserSessionIsActive(w, r)
 	if !ok {
 		return
 	}
 
-	_, ok = models.UserCanCRUD(email)
+	_, ok = models.UserCanCRUD(username)
 	if !ok {
 		helpers.ErrorResponse(w, http.StatusForbidden, "insufficient rights to list users")
 		return
@@ -87,7 +76,7 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 func GetUser(w http.ResponseWriter, r *http.Request) {
 	var u models.User
 
-	email, ok := CheckIfUserSessionIsActive(w, r)
+	username, ok := CheckIfUserSessionIsActive(w, r)
 	if !ok {
 		return
 	}
@@ -100,7 +89,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, ok := models.UserCanCRUD(email)
+	id, ok := models.UserCanCRUD(username)
 	if !ok && uid != id {
 		helpers.ErrorResponse(w, http.StatusForbidden, "insufficient rights to get user")
 		return
@@ -120,7 +109,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	var user models.User
 	params := mux.Vars(r)
 
-	email, ok := CheckIfUserSessionIsActive(w, r)
+	username, ok := CheckIfUserSessionIsActive(w, r)
 	if !ok {
 		return
 	}
@@ -141,7 +130,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, ok := models.UserCanCRUD(email)
+	id, ok := models.UserCanCRUD(username)
 	if !ok && uid != id {
 		helpers.ErrorResponse(w, http.StatusForbidden, "insufficient rights to update user")
 		return
@@ -163,7 +152,7 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	// dataFromRequest := getDataFromRequest()
 
-	email, ok := CheckIfUserSessionIsActive(w, r)
+	username, ok := CheckIfUserSessionIsActive(w, r)
 	if !ok {
 		return
 	}
@@ -184,7 +173,7 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, ok := models.UserCanCRUD(email)
+	id, ok := models.UserCanCRUD(username)
 	if !ok && uid != id {
 		helpers.ErrorResponse(w, http.StatusForbidden, "insufficient rights to update user")
 		return
@@ -202,12 +191,12 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 // DeleteUser function
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
 
-	email, ok := CheckIfUserSessionIsActive(w, r)
+	username, ok := CheckIfUserSessionIsActive(w, r)
 	if !ok {
 		return
 	}
 
-	if _, ok := models.UserCanCRUD(email); !ok {
+	if _, ok := models.UserCanCRUD(username); !ok {
 		helpers.ErrorResponse(w, http.StatusForbidden, "insufficient rights to delete user")
 		return
 	}
@@ -321,19 +310,19 @@ func CheckIfUserSessionIsActive(w http.ResponseWriter, r *http.Request) (string,
 	}
 	sessionToken := c.Value
 
-	// We then get the email of the user from our cache, where we set the session token
-	email, err := cache.Do("GET", sessionToken)
+	// We then get the username of the user from our cache, where we set the session token
+	username, err := cache.Do("GET", sessionToken)
 	if err != nil {
 		// If there is an error fetching from cache, return an internal server error status
 		helpers.ErrorResponse(w, http.StatusInternalServerError, "Internal Server Error, please login")
 		return "", false
 	}
-	if email == nil {
+	if username == nil {
 		// If the session token is not present in cache, return an unauthorized error
 		helpers.ErrorResponse(w, http.StatusUnauthorized, "Not Authorized, please login")
 		return "", false
 	}
 
 	// Return true if user has active session
-	return fmt.Sprintf("%s", email), true
+	return fmt.Sprintf("%s", username), true
 }
