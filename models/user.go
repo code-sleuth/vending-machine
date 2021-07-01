@@ -161,11 +161,11 @@ func (u *User) DeleteUser(id uint) (string, error) {
 }
 
 // Login function
-func (u *User) Login(email, password string) (string, error) {
+func (u *User) Login(username, password string) (string, error) {
 	var user User
 	plainPwd := getPwdBytes(password)
 
-	if err := db.Where("email = ?", email).First(&user).Error; err != nil {
+	if err := db.Where("username = ?", username).First(&user).Error; err != nil {
 		return "", errors.New("user not in database: " + err.Error())
 	}
 
