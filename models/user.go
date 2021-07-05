@@ -31,7 +31,7 @@ type User struct {
 	gorm.Model
 	Username string   `sql:"unique;unique_index;not null"`
 	Password string   `sql:"type:VARCHAR(255);not null"`
-	Deposit  int      `sql:"type:VARCHAR(255);not null"`
+	Deposit  int      `sql:"type:INTEGER;not null"`
 	Role     userRole `sql:"type:user_role;not null;DEFAULT:'buyer'"`
 }
 
@@ -270,7 +270,8 @@ func (u *User) DepositAmount(userID uint, amount int) (*User, error)  {
 
 }
 
-func (u *User) Buy(productID, userID uint, numberOfProducts int)  (string, error) {
+// Buy ...
+func (u *User) Buy(userID, productID uint, numberOfProducts int)  (string, error) {
 	var p Product
 	product, err := p.GetProduct(productID)
 	if err != nil {
@@ -302,7 +303,20 @@ func (u *User) Buy(productID, userID uint, numberOfProducts int)  (string, error
 	}
 	tx.Commit()
 
-	s := fmt.Sprintf("successfully made purchase of [%+v], available balance is [%+v]", transaction, user.Deposit)
+	remainingProducts := product.AmountAvailable - numberOfProducts
+	if remainingProducts < 0 {
+		remainingProducts = 0
+	}
+	product.AmountAvailable = remainingProducts
+
+	tx = db.Begin()
+	if err := db.Save(product).Error; err != nil {
+		tx.Rollback()
+		return "", errors.New("failed to buy item: update number of products" + err.Error())
+	}
+	tx.Commit()
+
+	s := fmt.Sprintf("successfully made purchase of [%+v], available balance is [%+v]", amountToSpend, user.Deposit)
 	return s, nil
 }
 
@@ -323,6 +337,7 @@ func (u *User) Reset (userID uint,) (*User,error){
 	return user, nil
 }
 
+// Find ...
 func Find(slice []int, val int) bool {
 	for _, item := range slice {
 		if item == val {

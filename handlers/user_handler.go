@@ -263,7 +263,7 @@ func DepositAmount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	u.Password = ""
-	helpers.JSONResponse(w, http.StatusAccepted, u)
+	helpers.JSONResponse(w, http.StatusOK, u)
 }
 
 // Buy function
@@ -315,7 +315,7 @@ func Buy (w http.ResponseWriter, r *http.Request) {
 		helpers.ErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	helpers.JSONResponse(w, http.StatusAccepted, u)
+	helpers.JSONResponse(w, http.StatusOK, u)
 }
 
 // Reset function

@@ -34,7 +34,7 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, err := product.CreateProduct(product.Cost, product.ProductName, product.SellerID)
+	u, err := product.CreateProduct(product.Cost, product.AmountAvailable, product.ProductName, product.SellerID)
 	if err != nil {
 		helpers.ErrorResponse(w, http.StatusBadRequest, "unable to create product "+err.Error())
 		return
@@ -108,7 +108,7 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, err := product.UpdateProduct(uid, product.SellerID, product.Cost, product.ProductName)
+	u, err := product.UpdateProduct(uid, product.SellerID, product.Cost, product.AmountAvailable, product.ProductName)
 	if err != nil {
 		helpers.ErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
