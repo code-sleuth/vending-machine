@@ -45,10 +45,11 @@ case $env in
         export DB_USERNAME=code
         export DB_PASSWORD='<password>'
         export DB_NAME=vending_machine_test
-        export TEST_DB_NAME=vending_machine_test
+        export TEST_DB_NAME=vending_machine_run_tests
         export DB_SSL_MODE=disable
         export ENVIRONMENT=development
         export JWT_SECRET=topsecret
+        export DB_URL='host=localhost user=code dbname=vending_machine_test sslmode=disable'
         echo "================ ENVIRONMENT VARIABLES FOR DEV ======================="
         echo -e "${RED}export DB_DIALECT=${DB_DIALECT}"
         echo -e "${RED}export DB_HOST=${DB_HOST}"
@@ -59,6 +60,7 @@ case $env in
         echo -e "${RED}export TEST_DB_NAME=${TEST_DB_NAME}"
         echo -e "${RED}export DB_SSL_MODE=${DB_SSL_MODE}"
         echo -e "${RED}export ENVIRONMENT=${ENVIRONMENT}"
+        echo -e "${RED}export DB_URL=${DB_URL}"
         echo -e "${RED}export JWT_SECRET=${JWT_SECRET}${NC}"
         ;;
     2)

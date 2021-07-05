@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"github.com/code-sleuth/vending-machine/handlers"
 	"github.com/code-sleuth/vending-machine/helpers"
 	"github.com/gorilla/mux"
 )
@@ -12,10 +11,10 @@ type ProductController struct {
 }
 
 // registerRoutes registers the user routes
-func (controller ProductController) registerRoutes() {
-	controller.Router.HandleFunc("/api/products", helpers.IsAuthorized(handlers.CreateProduct)).Methods("POST")
-	controller.Router.HandleFunc("/api/products", handlers.GetProducts).Methods("GET")
-	controller.Router.HandleFunc("/api/products/{id}", handlers.GetProduct).Methods("GET")
-	controller.Router.HandleFunc("/api/products/{id}", helpers.IsAuthorized(handlers.UpdateProduct)).Methods("PUT")
-	controller.Router.HandleFunc("/api/products/{id}", helpers.IsAuthorized(handlers.DeleteProduct)).Methods("DELETE")
+func (s *service) registerProductRoutes() {
+	s.productController.Router.HandleFunc("/api/products", helpers.IsAuthorized(s.handlers.CreateProduct)).Methods("POST")
+	//s.productController.Router.HandleFunc("/api/products", s.handlers.GetProducts).Methods("GET")
+	s.productController.Router.HandleFunc("/api/products/{id}", s.handlers.GetProduct).Methods("GET")
+	s.productController.Router.HandleFunc("/api/products/{id}", helpers.IsAuthorized(s.handlers.UpdateProduct)).Methods("PUT")
+	s.productController.Router.HandleFunc("/api/products/{id}/{userId}", helpers.IsAuthorized(s.handlers.DeleteProductHandler)).Methods("DELETE")
 }

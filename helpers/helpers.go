@@ -57,12 +57,12 @@ func GetEnv(key string, defaultVal string) string {
 }
 
 // GenerateJWT function
-func GenerateJWT(id uint, username string) (string, error) {
+func GenerateJWT(uuid string, username string) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 
 	claims := token.Claims.(jwt.MapClaims)
 	claims["authorized"] = true
-	claims["id"] = id
+	claims["uuid"] = uuid
 	claims["username"] = username
 	claims["exp"] = time.Now().Add(time.Minute * 120).Unix()
 
